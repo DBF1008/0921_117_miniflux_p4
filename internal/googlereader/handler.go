@@ -4,6 +4,7 @@
 package googlereader // import "miniflux.app/v2/internal/googlereader"
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -311,7 +312,7 @@ func (h *greaderHandler) editTagHandler(w http.ResponseWriter, r *http.Request) 
 		for _, entry := range entries {
 			e := entry
 			go func() {
-				integration.SendEntry(e, settings)
+				integration.SendEntry(context.Background(), e, settings)
 			}()
 		}
 	}

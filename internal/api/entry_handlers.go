@@ -260,9 +260,15 @@ func (h *handler) saveEntryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go integration.SendEntry(entry, settings)
+	results := integration.SendEntry(r.Context(), entry, settings)
 
-	response.JSONAccepted(w, r)
+	response.JSON(w, r, map[string]any{
+		"message":         "entry saved",
+		"total":           len(results),
+		"success_count":   len(results.Successes()),
+		"failure_count":   len(results.Failures()),
+		"results":         results,
+	})
 }
 
 func (h *handler) updateEntryHandler(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,7 @@ package integration
 
 import (
 	"bytes"
+	"context"
 	"log/slog"
 	"strings"
 	"testing"
@@ -14,7 +15,7 @@ import (
 
 func TestSendEntryLogsLinkwardenCollectionID(t *testing.T) {
 	var buf bytes.Buffer
-	handler := slog.NewJSONHandler(&buf, nil)
+	handler := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})
 	logger := slog.New(handler)
 	prev := slog.Default()
 	slog.SetDefault(logger)
@@ -30,7 +31,7 @@ func TestSendEntryLogsLinkwardenCollectionID(t *testing.T) {
 		LinkwardenAPIKey:       "",
 	}
 
-	SendEntry(entry, userIntegrations)
+	SendEntry(context.Background(), entry, userIntegrations)
 
 	out := buf.String()
 	if !strings.Contains(out, `"collection_id":12345`) {
@@ -40,7 +41,7 @@ func TestSendEntryLogsLinkwardenCollectionID(t *testing.T) {
 
 func TestSendEntryLogsLinkwardenWithoutCollectionID(t *testing.T) {
 	var buf bytes.Buffer
-	handler := slog.NewJSONHandler(&buf, nil)
+	handler := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})
 	logger := slog.New(handler)
 	prev := slog.Default()
 	slog.SetDefault(logger)
@@ -54,7 +55,7 @@ func TestSendEntryLogsLinkwardenWithoutCollectionID(t *testing.T) {
 		LinkwardenAPIKey:  "",
 	}
 
-	SendEntry(entry, userIntegrations)
+	SendEntry(context.Background(), entry, userIntegrations)
 
 	out := buf.String()
 	if strings.Contains(out, "collection_id") {

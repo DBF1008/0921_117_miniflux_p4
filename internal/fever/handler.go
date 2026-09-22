@@ -4,6 +4,7 @@
 package fever // import "miniflux.app/v2/internal/fever"
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -456,7 +457,7 @@ func (h *feverHandler) handleWriteItems(w http.ResponseWriter, r *http.Request) 
 		}
 
 		go func() {
-			integration.SendEntry(entry, settings)
+			integration.SendEntry(context.Background(), entry, settings)
 		}()
 	case "unsaved":
 		slog.Debug("[Fever] Mark entry as unsaved",

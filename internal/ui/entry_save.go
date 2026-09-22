@@ -33,7 +33,13 @@ func (h *handler) saveEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go integration.SendEntry(entry, userIntegrations)
+	results := integration.SendEntry(r.Context(), entry, userIntegrations)
 
-	response.JSONCreated(w, r, map[string]string{"message": "saved"})
+	response.JSONCreated(w, r, map[string]any{
+		"message":       "saved",
+		"total":         len(results),
+		"success_count": len(results.Successes()),
+		"failure_count": len(results.Failures()),
+		"results":       results,
+	})
 }
