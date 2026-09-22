@@ -6,6 +6,7 @@ package api // import "miniflux.app/v2/internal/api"
 import (
 	json_parser "encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -260,7 +261,24 @@ func (h *handler) saveEntryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go integration.SendEntry(entry, settings)
+	userID := request.UserID(r)
+	go func() {
+		results := integration.SendEntry(entry, settings)
+
+		failedProviders := make([]string, 0, len(results))
+		for _, result := range results {
+			if result.Err != nil {
+				failedProviders = append(failedProviders, result.Provider)
+			}
+		}
+
+		slog.Info("Entry dispatched to third-party integrations",
+			slog.Int64("user_id", userID),
+			slog.Int64("entry_id", entryID),
+			slog.Int("nb_providers", len(results)),
+			slog.Any("failed_providers", failedProviders),
+		)
+	}()
 
 	response.JSONAccepted(w, r)
 }
